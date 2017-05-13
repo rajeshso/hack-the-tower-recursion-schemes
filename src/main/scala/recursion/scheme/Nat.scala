@@ -1,4 +1,5 @@
-package recursion.scheme
+package recursion
+package scheme
 
 import cats._
 import cats.implicits._
@@ -16,7 +17,6 @@ object Nat {
   }
 }
 
-case class Fix[F[_]](unfix: F[Fix[F]])
 
 object Recurse extends App {
   
@@ -27,10 +27,15 @@ object Recurse extends App {
     case Succ(n) => n + 1
   }
 
-  def cata[F[_]: Functor, A](fix: Fix[F])(algebra: F[A] => A): A = {
-    algebra(fix.unfix.map(ffix => cata(ffix)(algebra)))
+  val toNat: Int => Nat[Int] = {
+    case 0 => Zero()
+    case n => Succ(n - 1)  
   }
 
   val result = cata(number)(toInt)
   println(result)
+  val result2 = ana(5)(toNat)
+  println(result2)
+  val result3 = hylo(5)(toInt, toNat)
+  println(result3)
 }
